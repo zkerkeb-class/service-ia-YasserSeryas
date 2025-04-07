@@ -1,0 +1,125 @@
+// services/perplexityService.js
+
+const { OpenAI } = require("openai");
+require("dotenv").config();
+
+// Configuration du client Perplexity
+const perplexityClient = new OpenAI({
+  apiKey: process.env.PERPLEXITY_API_KEY,
+  baseURL: "https://api.perplexity.ai",
+});
+
+/**
+ * Récupère les événements tendance basés sur la localisation et les préférences de l'utilisateur
+ * @param {string} userLocation - La localisation de l'utilisateur
+ * @param {Array} userPreferences - Les préférences de l'utilisateur
+ * @returns {Promise<string>} - Les recommandations d'événements
+ */
+const getTrendingEvents = async (userLocation, userPreferences) => {
+  try {
+    const completion = await perplexityClient.chat.completions.create({
+      model: "sonar-pro",
+      messages: [
+        {
+          role: "system",
+          content:
+            "Vous êtes un assistant spécialisé dans la recommandation d'événements culturels, sportifs et de divertissement. Proposez uniquement des événements tendance et populaires avec leurs dates et lieux. Limitez-vous à 5 suggestions maximum. Présentez les résultats de manière structurée et attrayante.",
+        },
+        {
+          role: "user",
+          content: `Quels sont les événements tendance à ${
+            userLocation || "Paris"
+          } qui pourraient intéresser quelqu'un qui aime ${
+            userPreferences?.join(", ") || "la musique, le sport et les arts"
+          }? Je cherche des idées pour les prochaines semaines.`,
+        },
+      ],
+    });
+
+    return completion.choices[0].message.content;
+  } catch (error) {
+    console.error(
+      "Erreur lors de la récupération des événements tendance:",
+      error
+    );
+    throw new Error(
+      "Impossible de récupérer les événements tendance pour le moment"
+    );
+  }
+};
+
+/**
+ * Génère des suggestions personnalisées basées sur l'historique des événements consultés
+ * @param {Array} eventHistory - L'historique des événements consultés par l'utilisateur
+ * @returns {Promise<string>} - Les suggestions personnalisées
+ */
+const getPersonalizedSuggestions = async (eventHistory) => {
+  try {
+    const historyText =
+      eventHistory
+        ?.map(
+          (event) => `${event.name} (${event.category}) à ${event.location}`
+        )
+        .join(", ") || "aucun historique disponible";
+
+    const completion = await perplexityClient.chat.completions.create({
+      model: "sonar-pro",
+      messages: [
+        {
+          role: "system",
+          content:
+            "Vous êtes un assistant spécialisé dans la recommandation d'événements. Basez vos suggestions sur l'historique de l'utilisateur. Proposez des événements variés mais cohérents avec ses goûts. Limitez-vous à 3 suggestions précises et pertinentes.",
+        },
+        {
+          role: "user",
+          content: `Basé sur mon historique d'événements consultés: ${historyText}, pouvez-vous me suggérer d'autres événements que je pourrais aimer? Je cherche des idées nouvelles mais qui correspondent à mes goûts.`,
+        },
+      ],
+    });
+
+    return completion.choices[0].message.content;
+  } catch (error) {
+    console.error(
+      "Erreur lors de la génération de suggestions personnalisées:",
+      error
+    );
+    throw new Error(
+      "Impossible de générer des suggestions personnalisées pour le moment"
+    );
+  }
+};
+
+/**
+ * Répond aux questions spécifiques sur les événements
+ * @param {string} userQuestion - La question de l'utilisateur
+ * @returns {Promise<string>} - La réponse à la question
+ */
+const answerEventQuestion = async (userQuestion) => {
+  try {
+    const completion = await perplexityClient.chat.completions.create({
+      model: "sonar-pro",
+      messages: [
+        {
+          role: "system",
+          content:
+            "Vous êtes un assistant spécialisé dans les événements et la billetterie. Répondez de manière concise et informative aux questions des utilisateurs concernant les événements, les tendances, ou les recommandations.",
+        },
+        {
+          role: "user",
+          content: userQuestion,
+        },
+      ],
+    });
+
+    return completion.choices[0].message.content;
+  } catch (error) {
+    console.error("Erreur lors de la réponse à la question:", error);
+    throw new Error("Impossible de répondre à votre question pour le moment");
+  }
+};
+
+module.exports = {
+  getTrendingEvents,
+  getPersonalizedSuggestions,
+  answerEventQuestion,
+};
