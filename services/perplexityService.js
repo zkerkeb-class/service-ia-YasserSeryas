@@ -22,18 +22,48 @@ const getTrendingEvents = async (userLocation, userPreferences) => {
       messages: [
         {
           role: "system",
-          content:
-            "Vous êtes un assistant spécialisé dans la recommandation d'événements culturels, sportifs et de divertissement. Proposez uniquement des événements tendance et populaires avec leurs dates et lieux. Limitez-vous à 5 suggestions maximum. Présentez les résultats de manière structurée et attrayante.",
+          content: `
+            Vous êtes un assistant expert en recommandation d'événements culturels, sportifs et de divertissement.
+            Votre mission est de proposer uniquement des événements populaires et tendance, à venir dans les prochaines semaines.
+            Limitez vos réponses à un maximum de 5 suggestions pertinentes, avec pour chacun :
+            - Le nom de l'événement
+            - Une courte description
+            - La date
+            - Le lieu
+            - Pourquoi il est tendance actuellement
+      
+            Présentez le tout de manière claire, attrayante et facile à parcourir.
+          `.trim(),
         },
         {
           role: "user",
-          content: `Quels sont les événements tendance à ${
-            userLocation || "Paris"
-          } qui pourraient intéresser quelqu'un qui aime ${
-            userPreferences?.join(", ") || "la musique, le sport et les arts"
-          }? Je cherche des idées pour les prochaines semaines.`,
+          content: `
+            Quels sont les événements les plus en vogue à ${
+              userLocation || "Paris"
+            } en ce moment ?
+            J'aimerais découvrir des idées originales à organiser ou à vivre, en lien avec mes centres d'intérêt : ${
+              userPreferences?.join(", ") || "la musique, le sport et les arts"
+            }.
+            Je cherche des idées inspirantes pour les prochaines semaines.
+          `.trim(),
         },
       ],
+
+      //   messages: [
+      //     {
+      //       role: "system",
+      //       content:
+      //         "Vous êtes un assistant spécialisé dans la recommandation d'événements culturels, sportifs et de divertissement. Proposez uniquement des événements tendance et populaires avec leurs dates et lieux. Limitez-vous à 5 suggestions maximum. Présentez les résultats de manière structurée et attrayante.",
+      //     },
+      //     {
+      //       role: "user",
+      //       content: `Quels sont les types d'événements tendance à ${
+      //         userLocation || "Paris"
+      //       } qui pourraient intéresser quelqu'un qui aime ${
+      //         userPreferences?.join(", ") || "la musique, le sport et les arts"
+      //       }? Je cherche des idées pour les prochaines semaines.`,
+      //     },
+      //   ],
     });
 
     return completion.choices[0].message.content;
