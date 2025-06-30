@@ -139,8 +139,54 @@ const answerEventQuestion = async (userQuestion) => {
   }
 };
 
+/**
+ * Génère une description d'événement basée sur le titre fourni
+ * @param {string} eventTitle - Le titre de l'événement
+ * @returns {Promise<string>} - La description générée pour l'événement
+ */
+const generateEventDescription = async (eventTitle) => {
+  try {
+    const completion = await perplexityClient.chat.completions.create({
+      model: "sonar-pro",
+      messages: [
+        {
+          role: "system",
+          content: `
+            Vous êtes un expert en création de contenu événementiel. Votre mission est de générer des descriptions attrayantes et détaillées pour des événements basées uniquement sur leur titre.
+            
+            Pour chaque titre d'événement fourni, créez une description qui inclut :
+            - Une présentation engageante de l'événement
+            - Le type d'audience ciblée
+            - Ce que les participants peuvent attendre
+            - L'ambiance et l'expérience proposée
+            - Des détails qui donnent envie de participer
+            
+            La description doit être professionnelle, accrocheuse et faire entre 100-200 mots.
+            Adaptez le ton et le style selon le type d'événement suggéré par le titre.
+          `.trim(),
+        },
+        {
+          role: "user",
+          content: `Générez une description complète et attrayante pour cet événement : "${eventTitle}"`,
+        },
+      ],
+    });
+
+    return completion.choices[0].message.content;
+  } catch (error) {
+    console.error(
+      "Erreur lors de la génération de la description d'événement:",
+      error
+    );
+    throw new Error(
+      "Impossible de générer la description de l'événement pour le moment"
+    );
+  }
+};
+
 module.exports = {
-  getTrendingEvents,
+  getTrendingEventsAndIdeas,
   getPersonalizedSuggestions,
   answerEventQuestion,
+  generateEventDescription,
 };

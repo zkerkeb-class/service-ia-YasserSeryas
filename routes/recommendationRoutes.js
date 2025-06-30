@@ -13,7 +13,7 @@ router.get("/trending", async (req, res) => {
     const { location, preferences } = req.query;
     const userPreferences = preferences ? preferences.split(",") : [];
 
-    const trendingEvents = await perplexityService.getTrendingEvents(
+    const trendingEvents = await perplexityService.getTrendingEventsAndIdeas(
       location,
       userPreferences
     );
@@ -80,6 +80,38 @@ router.post("/ask", async (req, res) => {
     res.status(500).json({
       success: false,
       error: error.message || "Erreur lors de la réponse à la question",
+    });
+  }
+});
+
+/**
+ * Route pour générer une description d'événement basée sur le titre
+ * POST /api/recommendations/generate-description
+ */
+router.post("/generate-description", async (req, res) => {
+  try {
+    const { title } = req.body;
+
+    if (!title) {
+      return res.status(400).json({
+        success: false,
+        error: "Le titre de l'événement est requis",
+      });
+    }
+
+    const description = await perplexityService.generateEventDescription(title);
+
+    res.json({ 
+      success: true, 
+      data: { 
+        title,
+        description 
+      } 
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message || "Erreur lors de la génération de la description",
     });
   }
 });
