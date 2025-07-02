@@ -167,7 +167,7 @@ const generateEventDescription = async (eventTitle) => {
         },
         {
           role: "user",
-          content: `Générez une description complète et attrayante pour cet événement : "${eventTitle}"`,
+          content: `Générez une description complète et attrayante pour cet événement sans mettre les sources et les liens : "${eventTitle}"`,
         },
       ],
     });
