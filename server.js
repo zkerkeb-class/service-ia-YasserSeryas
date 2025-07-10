@@ -20,6 +20,9 @@ app.use("/api/recommendations", recommendationRoutes);
 app.get("/", (req, res) => {
   res.json({ message: "API de recommandation d'événements opérationnelle" });
 });
+app.get("/health", (req, res) => {
+  res.json({ status: "OK", timestamp: new Date().toISOString() });
+});
 
 // Gestion des erreurs
 app.use((err, req, res, next) => {
